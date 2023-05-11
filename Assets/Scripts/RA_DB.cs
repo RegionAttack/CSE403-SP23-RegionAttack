@@ -2,228 +2,141 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using NUnit.Framework;
+
 using UnityEngine.TestTools;
-using Mono.Data.Sqlite;
+//using Mono.Data.Sqlite;
+using MySql.Data.MySqlClient;
 
-public class RA_DB : MonoBehaviour
+public class RA_DB  // : MonoBehaviour
 {
-    private string dbName = "URI=file:Inventory.db";
-    // Start is called before the first frame update
-    void Start() //added the public, originally just "void Start()"
-    {
-        //this method can have a bunch of stuff, like create tables and read/write
-        //createDB();
-    }
 
-    // Update is called once per frame
-    void Update()
+    private string connectionString = "server=ls-ce5399038c51311cbf1d9d5bfdef049493963c8d.cafcpcqvxqv2.us-west-2.rds.amazonaws.com;user=dbmaster1;database=Database-1;port=3306;password=dbmaster1;";
+    
+    
+    public string testConnection()
     {
+        string connectionString = connectionString;
+        MySqlConnection connection = new MySqlConnection(connectionString);
 
-    }
-
-    private int createDB()
-    {
-        int tablesMade = 0;
-        using (var connection = new SqliteConnection(dbName))
+        try
         {
             connection.Open();
-            //create USERS table. holds login and basic information
-            using (var command = connection.CreateCommand())
-            {
-                //1 table for each player info
-                command.CommandText = "CREATE TABLE IF NOT EXISTS USERS (name VARCHAR(20), pwd VARCHAR(20), onlineStatus INT, totalWins INT, totalGames INT);"; //need a semi-colon outside and inside the quotations
-                command.ExecuteNonQuery();
-                tablesMade += 1;
+            Console.WriteLine("Connection opened successfully!");
 
-            }
+        }
+        catch (MySqlException ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+            return "connection failed";
+        }
+        finally
+        {
             connection.Close();
-        }
-        //create GAME table. used to maintain games that are being played between remote players.
-        using (var command2 = connection.CreateCommand())
-        {
-            //1 table for each player info
-            command2.CommandText = "CREATE TABLE IF NOT EXISTS GAMES (gameID INT, user1 VARCHAR(20), user2 VARCHAR(20), moveNum INTEGER, currentPlayer VARCHAR(20), lastNum INTEGER, placement INTEGER);"; //need a semi-colon outside and inside the quotations
-            command2.ExecuteNonQuery();
-            tablesMade += 1;
+            Console.WriteLine("Connection closed.");
 
         }
-        connection.Close();
-
-        //create FRIEND table. friends list
-        using (var command3 = connection.CreateCommand())
-        {
-            //1 table for each player info
-            command3.CommandText = "CREATE TABLE IF NOT EXISTS FRIEND (user1 VARCHAR(20), user2 VARCHAR(20));"; //need a semi-colon outside and inside the quotations
-            command3.ExecuteNonQuery();
-            tablesMade += 1;
-
-        }
-        connection.Close();
-
-        return tablesMade;
+        return "connection successful"; //occurs if the connection opens, and is then closed
 
     }
 
-    public int CreateUser(string name, string pwd)
+    //rn just create the Friends Table
+    public string createTables() 
     {
-        //add a brand new player to the database, check first if same user name is there
-
-        bool userExists = true; //rewrite to use integers, for various failure modes. transmit data back to client
-        int t = 0;
-
-        using (var command = connection.CreateCommand())
+        string ret = "";
+        string connStr = connectionString;
+        MySqlConnection conn = new MySqlConnection(connStr);
+        try
         {
-            //name VARCHAR(20), pwd VARCHAR(20), onlineStatus INT, totalWins INT, totalGames INT
-            command.CommandText = "SELECT * FROM USERS WHERE name='"+name+"';"; //need a semi-colon outside and inside the quotations
-            using (IDataReader reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                    if (reader["name"] == name)
-                    {
-                        userExists = false;
-                        t = 1;
-                    }
-                reader.Close();
-            }
+            Console.WriteLine("Connecting to MySQL...");
+            conn.Open();
+
+            //string sql = "SELECT Name, HeadOfState FROM Country WHERE Continent='Oceania'";
+            string sql2 = "CREATE TABLE FRIENDS (user1 varchar(20), user2 varchar(20))";
+            MySqlCommand cmd = new MySqlCommand(sql2, conn);
+            MySqlDataReader rdr = cmd.ExecuteNonQuery();
+            ret = "worked";
 
         }
-        connection.Close();
-
-        //1 indicates that the user already exists
-        if (t == 1)
+        catch (Exception ex)
         {
-            return t;
+            Console.WriteLine(ex.ToString());
+            ret = "failed";
         }
 
+        conn.Close();
+        Console.WriteLine("Done.");
+        Console.WriteLine(ret);
+        return ret;
 
-        if (userExists)
-        {
-            using (var command = connection.CreateCommand())
-            {
-                //name VARCHAR(20), pwd VARCHAR(20), onlineStatus INT, totalWins INT, totalGames INT
-                command.CommandText = "INSERT INTO USERS (name, pwd, onlineStatus, totalWins, totalGames) VALUES ('" + name + "','" + pwd + "', 0, 0, 0 );"; //need a semi-colon outside and inside the quotations
-                command.ExecuteNonQuery();
-
-            }
-            connection.Close();
-            t = 2;
-
-        }
-
-        //returns true if the method just added the new user. returns false if the user already existed
-        //return 2 indicates that the user previous did not exist, but now exists
-        return t;
 
     }
 
-    public void login()
+    public string addFriend(string p1, string p2) {
+        string ret = "";
+        string connStr = connectionString;
+        MySqlConnection conn = new MySqlConnection(connStr);
+        try
+        {
+            Console.WriteLine("Connecting to MySQL...");
+            conn.Open();
+
+            //string sql = "SELECT Name, HeadOfState FROM Country WHERE Continent='Oceania'";
+            string sql = "INSERT INTO FRIENDS (user1, user2) VALUES (bob, joe)";
+            
+            MySqlCommand cmd = new MySqlCommand(sql, conn);
+            MySqlDataReader rdr = cmd.ExecuteNonQuery();
+            ret = "worked";
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            ret = "failed";
+        }
+
+        conn.Close();
+        Console.WriteLine("Done.");
+        Console.WriteLine(ret);
+        return ret;
+
+    }
+
+    /*
+        this is method is not used in the game functionality, but is primarily used by the test code to reset the AWS MySql database 
+        so that testing will return the same result each time, rather than having duplicate values in the database after running the test once
+        resulting in the database needing to get manually reset for accurate testing.
+    */
+    public string clearTables() 
     {
 
+        
+        string ret = "";
+        string connStr = connectinString;
+        MySqlConnection conn = new MySqlConnection(connStr);
+        try
+        {
+            Console.WriteLine("Connecting to MySQL...");
+            conn.Open();
+
+            //string sql = "SELECT Name, HeadOfState FROM Country WHERE Continent='Oceania'";
+            string sql = "DELETE FROM FRIENDS";
+
+
+            MySqlCommand cmd = new MySqlCommand(sql, conn);
+            MySqlDataReader rdr = cmd.ExecuteNonQuery();
+            ret = "worked";
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            ret = "failed";
+        }
+
+        conn.Close();
+        Console.WriteLine("Done.");
+        Console.WriteLine(ret);
+        return ret;
 
     }
-
-    public void logout() { }
-
-    public int addFriend(string mainPlayer, string friendName)
-    {
-        //check if mainPlayer and friend both exist
-
-        int status = 0;
-        bool main = false;
-        bool friend = false;
-        using (var command = connection.CreateCommand())
-        {
-            command.CommandText = "SELECT name FROM USERS;";
-            using (IDataReader reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                    if (reader["name"] == mainPlayer)
-                    {
-                        mainPlayer = true;
-                        status += 1;
-                    }
-                if (reader["name"] == friendName)
-                {
-                    friend = true;
-                    status += 1;
-                }
-                reader.Close();
-            }
-        }
-        connection.Close();
-        if (status < 2)
-        {
-            return status;
-        }
-        if (main && friend && status == 2)
-        {
-            using (var command3 = connection.CreateCOmmand())
-            {
-                command3.CommandText = "SELECT * FROM FRIEND WHERE user1 = '"+mainPlayer+"';";
-                using (IDataReader reader = command3.ExecuteReader())
-                {
-                    while (reader.Read())
-                        if (reader["user2"] == friendName)
-                        {
-                            status += 1;
-                        }
-                    reader.Close();
-                }
-            }
-            //if status=3, then the tuple exists. if status=2, the tuple doesnt exist
-            if (status == 2)
-            {
-                using (var command2 = connection.CreateCOmmand())
-                {
-                    command2.CommandText = "INSERT INTO FRIEND (user1, user2) VALUES ('" + mainPlayer + "','" + friendName + "');";
-                    command2.ExecuteNonQuery();
-                    status += 2;
-                }
-            }
-        }
-
-        //add mainPlayer<->friend connection
-        return status;
-
-    }
-
-    public bool startOnlinePlay(string name)
-    {
-
-        bool done = false;
-
-        using (var command = connection.CreateCommand())
-        {
-            //name VARCHAR(20), pwd VARCHAR(20), onlineStatus INT, totalWins INT, totalGames INT
-            command.CommandText = "UPDATE USERS SET onlineStatus = 1 WHERE name='"+name+"';"; //need a semi-colon outside and inside the quotations
-            command.ExecuteNonQuery();
-            done = true;
-
-        }
-        connection.Close();
-
-        return done;
-
-    }
-
-    public bool endOnlinePlay(string name)
-    {
-
-        bool done = false;
-
-        using (var command = connection.CreateCommand())
-        {
-            //name VARCHAR(20), pwd VARCHAR(20), onlineStatus INT, totalWins INT, totalGames INT
-            command.CommandText = "UPDATE USERS SET onlineStatus = 0 WHERE name='"+name+"';"; //need a semi-colon outside and inside the quotations
-            command.ExecuteNonQuery();
-            done = true;
-
-        }
-        connection.Close();
-
-        return done;
-
-    }
-
 }
