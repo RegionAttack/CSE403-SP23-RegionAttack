@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -24,17 +25,19 @@ public class GridManager : MonoBehaviour
     // Reference to the tile GameObjects
     Tile[,] _tiles;
 
-    // Given the dimension and the internal representation of the board,
-    // extracts the necessary information and initializes the board
-    public void Initialize(int dimension, (int, bool)[,] board)
+    // Given the dimension of the board, initializes
+    public void Initialize(int dimension)
     {
         _dimension = dimension;
+
+        // Clear the board just in case
+        Clear();
 
         // Make the grid nice
         SetGridSize();
 
         // Populate the grid
-        PopulateGrid(board);
+        PopulateGrid();
     }
 
     public void Clear()
@@ -57,6 +60,15 @@ public class GridManager : MonoBehaviour
             {
                 _tiles[i, j].SetNum(board[i, j]);
             }
+        }
+    }
+
+    // Highlights the given tiles
+    public void HighlightTiles(List<(int, int)> moves, bool enable)
+    {
+        foreach ((int, int) move in moves)
+        {
+            _tiles[move.Item1, move.Item2].Highlight(enable);
         }
     }
 
@@ -113,8 +125,8 @@ public class GridManager : MonoBehaviour
     }
 
 
-    // Helper function to instantiate the tile prefabs
-    void PopulateGrid((int, bool)[,] board)
+    // Helper function to instantiate the tile prefabs.
+    void PopulateGrid()
     {
         // Initialize the tiles array
         _tiles = new Tile[_dimension, _dimension];
@@ -124,12 +136,11 @@ public class GridManager : MonoBehaviour
             for (int j = 0; j < _dimension; j++)
             {
                 (int, int) pos = (i, j);
-                bool isP1 = board[i, j].Item2;
                 Tile tile = Instantiate(_tilePrefab);
                 tile.name = $"tile{i}-{j}";
                 tile.transform.SetParent(transform, false);
                 tile._button.onClick.AddListener(() => { _gameManager.SetPosition(tile); });
-                tile.Init(isP1, pos);
+                tile.Init(true, pos);
                 _tiles[i, j] = tile;
             }
         }

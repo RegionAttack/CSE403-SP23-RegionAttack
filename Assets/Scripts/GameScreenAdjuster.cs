@@ -6,29 +6,16 @@ using UnityEngine.UI;
 [ExecuteInEditMode]
 public class GameScreenAdjuster : MonoBehaviour
 {
-    public GameManager gameManager;
+    public GameManager _gameManager;
     public RectTransform _moveTimer, _gameTimer;
 
     private static float _gridRatio = 0.8f;
     private static float _timerRatio = 0.08f;
 
-    public bool _isLandScape;
-
-    private void Start()
-    {
-        //_isLandScape = Screen.width > Screen.height;
-        //ChangePosition();
-        //Adjust();
-    }
 
     private void OnRectTransformDimensionsChange()
     {
-        if (_isLandScape != (Screen.width > Screen.height))
-        {
-            _isLandScape = Screen.width > Screen.height;
-            ChangePosition();
-        }
-            
+        ChangePosition();
         Adjust();
     }
 
@@ -42,24 +29,24 @@ public class GameScreenAdjuster : MonoBehaviour
             gridSize = Screen.height * _gridRatio;
 
             // Set P1's position to the left
-            RectTransform rect = gameManager._p1Hand.transform.GetComponent<RectTransform>();
+            RectTransform rect = _gameManager._p1Hand.transform.GetComponent<RectTransform>();
             rect.pivot = new Vector2(0, 0.5f);
         }
         else
         {
-            // Set P1's position to the top
-            RectTransform rect = gameManager._p1Hand.transform.GetComponent<RectTransform>();
-            rect.pivot = new Vector2(0.5f, 0); // pivot on bottom (since rotated)
-            rect.anchorMax = new Vector2(0.5f, 1); // anker on top
-            rect.anchorMin = new Vector2(0.5f, 1);
-            rect.rotation = Quaternion.Euler(0, 0, 180);  // Flip it
-
-            // Set P2's position to the bottom
-            rect = gameManager._p2Hand.transform.GetComponent<RectTransform>();
+            // Set P1's position to the bottom
+            RectTransform rect = _gameManager._p1Hand.transform.GetComponent<RectTransform>();
             rect.pivot = new Vector2(0.5f, 0);  // pivot on bottom
             rect.anchorMax = new Vector2(0.5f, 0); // Anker to the bottom of screen
             rect.anchorMin = new Vector2(0.5f, 0);
             rect.rotation = Quaternion.identity;
+
+            // Set P2's position to the top
+            rect = _gameManager._p2Hand.transform.GetComponent<RectTransform>();
+            rect.pivot = new Vector2(0.5f, 0); // pivot on bottom (since rotated)
+            rect.anchorMax = new Vector2(0.5f, 1); // anker on top
+            rect.anchorMin = new Vector2(0.5f, 1);
+            rect.rotation = Quaternion.Euler(0, 0, 180);  // Flip it
 
             // Set the size and position of the timers
             _moveTimer.pivot = Vector2.one * 0.5f;  // Pivot on center
@@ -82,7 +69,7 @@ public class GameScreenAdjuster : MonoBehaviour
             gridSize = Screen.height * _gridRatio;
 
             // Set P1's position to the left
-            RectTransform rect = gameManager._p1Hand.transform.GetComponent<RectTransform>();
+            RectTransform rect = _gameManager._p1Hand.transform.GetComponent<RectTransform>();
             rect.pivot = new Vector2(0, 0.5f);
         }
         else
@@ -94,13 +81,14 @@ public class GameScreenAdjuster : MonoBehaviour
 
             //print($"Height: {height}");
             // Adjust the size
-            RectTransform rect = gameManager._p1Hand.transform.GetComponent<RectTransform>();
+            RectTransform rect = _gameManager._p1Hand.transform.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(gridSize, height);
+            rect.anchoredPosition = new Vector3(0, height, 0);
+
+            rect = _gameManager._p2Hand.transform.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(gridSize, height);
             rect.anchoredPosition = new Vector3(0, -height, 0);
 
-            rect = gameManager._p2Hand.transform.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(gridSize, height);
-            rect.anchoredPosition = new Vector3(0, height, 0);
 
             _gameTimer.sizeDelta = new Vector2(gridSize / 2, Screen.width * _timerRatio);
             _gameTimer.anchoredPosition = new Vector3(-Screen.width * (1 - _gridRatio)/4, 0, 0);
@@ -108,16 +96,15 @@ public class GameScreenAdjuster : MonoBehaviour
             _moveTimer.anchoredPosition = new Vector3(Screen.width * (1 - _gridRatio)/4, 0, 0);
         }
 
-        float cellSize = gameManager._gridManager.SetGridSize(gridSize);
+        float cellSize = _gameManager._gridManager.SetGridSize(gridSize);
         float spaceSize = cellSize * GridManager._spaceRatio;
 
-        GridLayoutGroup grid = gameManager._p1Hand._parent.GetComponent<GridLayoutGroup>();
+        GridLayoutGroup grid = _gameManager._p1Hand._parent.GetComponent<GridLayoutGroup>();
         grid.cellSize = Vector2.one * cellSize;
         grid.spacing = Vector2.one * spaceSize;
 
-        grid = gameManager._p2Hand._parent.GetComponent<GridLayoutGroup>();
+        grid = _gameManager._p2Hand._parent.GetComponent<GridLayoutGroup>();
         grid.cellSize = Vector2.one * cellSize;
         grid.spacing = Vector2.one * spaceSize;
-
     }
 }

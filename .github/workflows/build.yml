@@ -1,11 +1,14 @@
 name: Build project
 
-on: [push]
+on: 
+  schedule: 
+    - cron: "0 0 */2 * *"
 
 jobs:
   buildForAllSupportedPlatforms:
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -14,8 +17,8 @@ jobs:
           #- StandaloneWindows # Build a Windows standalone.
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
           #- StandaloneLinux64 # Build a Linux 64-bit standalone.
-          #- iOS # Build an iOS player.
-          #- Android # Build an Android .apk standalone app.
+          - iOS # Build an iOS player.
+          - Android # Build an Android .apk standalone app.
           #- WebGL # WebGL.
     steps:
       - uses: actions/checkout@v2

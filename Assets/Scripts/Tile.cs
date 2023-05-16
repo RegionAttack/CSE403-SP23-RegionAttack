@@ -12,11 +12,17 @@ public class Tile : MonoBehaviour
 
     // References to the UI that changes
     public TMP_Text _text;
+    public Image _highlight;
     public Button _button;
 
     public float _hue = 0;
 
     public ColorBlock _p1ColorBlock, _p2ColorBlock;
+
+    public void Highlight(bool enable)
+    {
+        _highlight.gameObject.SetActive(enable);
+    }
 
 
     public void Init(bool isP1, (int, int) position)
@@ -37,11 +43,13 @@ public class Tile : MonoBehaviour
         _isP1 = tile.Item2;
         if (_num != 0)
             _text.text = _num.ToString();
+        else
+            _text.text = "";
 
         _button.colors = _isP1 ? _p1ColorBlock : _p2ColorBlock;
     }
 
-    ColorBlock GenerateColorBlock(float hue)
+    static ColorBlock GenerateColorBlock(float hue)
     {
         ColorBlock colorBlock = new ColorBlock();
         colorBlock.normalColor = Color.HSVToRGB(hue, 0.5f, 1);
