@@ -10,8 +10,8 @@ using MySql.Data.MySqlClient;
 public class RA_DB  // : MonoBehaviour
 {
 
-    private string globalConnectionString2 = "server=ls-ce5399038c51311cbf1d9d5bfdef049493963c8d.cafcpcqvxqv2.us-west-2.rds.amazonaws.com;user=dbmaster1;database=Database-1;port=3306;password=dbmaster1;";
-    private string globalConnectionString3 = "server=ls-ce5399038c51311cbf1d9d5bfdef049493963c8d.cafcpcqvxqv2.us-west-2.rds.amazonaws.com;user=dbmaster1;database=Database-1;password=dbmaster1;";
+    //private string globalConnectionString2 = "server=ls-ce5399038c51311cbf1d9d5bfdef049493963c8d.cafcpcqvxqv2.us-west-2.rds.amazonaws.com;user=dbmaster1;database=Database-1;port=3306;password=dbmaster1;";
+    //private string globalConnectionString3 = "server=ls-ce5399038c51311cbf1d9d5bfdef049493963c8d.cafcpcqvxqv2.us-west-2.rds.amazonaws.com;user=dbmaster1;database=Database-1;password=dbmaster1;";
 
     private string globalConnectionString = "server=ls-ce5399038c51311cbf1d9d5bfdef049493963c8d.cafcpcqvxqv2.us-west-2.rds.amazonaws.com;uid=dbmaster1;pwd=dbmaster1;database=Database-1";
 
@@ -27,10 +27,10 @@ public class RA_DB  // : MonoBehaviour
             Console.WriteLine("Connection opened successfully!");
 
         }
-        catch (MySqlException ex)
+        catch (Exception ex)
         {
             Console.WriteLine("Error: " + ex.Message);
-            return "connection failed";
+            return "connection failed"+ex.Message+" ";
         }
         finally
         {
