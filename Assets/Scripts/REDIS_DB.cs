@@ -2,12 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-
 using UnityEngine.TestTools;
-//using Mono.Data.Sqlite;
+/*
+using redisU.utils;
+using redisU.framework;
+using redisU.events;
+*/
 using MySql.Data.MySqlClient;
+using StackExchange.Redis;
 
-public class RA_DB  // : MonoBehaviour
+
+public class REDIS_DB  // : MonoBehaviour
 {
 
     //private string globalConnectionString2 = "server=ls-ce5399038c51311cbf1d9d5bfdef049493963c8d.cafcpcqvxqv2.us-west-2.rds.amazonaws.com;user=dbmaster1;database=Database-1;port=3306;password=dbmaster1;";

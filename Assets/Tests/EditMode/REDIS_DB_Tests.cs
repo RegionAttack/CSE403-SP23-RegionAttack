@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 //using MySql.Data.MySqlClient;
 
-public class DBTests
+public class REDISTests
 {
     // A Test  as an ordinary method
 
